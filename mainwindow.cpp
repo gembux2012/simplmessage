@@ -14,8 +14,9 @@ MainWindow::MainWindow(QWidget *parent)
   } else {
     ui->textEdit->append("server error");
   }
-
-  // QThread s_thread = new QThread();
+  QThread *s_thread = new QThread();
+  server.moveToThread(s_thread);
+  s_thread->start();
 }
 
 MainWindow::~MainWindow() { delete ui; }

@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QTcpSocket>
-#include <thread>
+#include <QThread>
 
 namespace Ui {
 class MainWindow;
