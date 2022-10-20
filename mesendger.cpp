@@ -1,18 +1,33 @@
 #include "mesendger.h"
 #include <QDataStream>
 
-Server::Server() { this->listen(QHostAddress::Any, 2323); }
+void Server::Server() { tsps = new QTcpServer(); }
 
-void Messendger::toLog(QString str) { emit Logger(str); }
+void th_server::process() {
+  Server *server = new Server();
+  server->tsps->listen(QHostAddress::Any, 2323);
+  if (server != nullptr || server->tsps->isListening()) {
 
-void Server::incomingConnection(qintptr socketDescriptor) {
+    toLog("Server start");
+  } else {
+    toLog("server error");
+    emit finished(false);
+  }
+}
+// void Messendger::toLog(QString str) { emit Logger(str); }
+
+void Server::in_conection()::incomingConnection(qintptr socketDescriptor) {
   socket = new QTcpSocket;
   socket->setSocketDescriptor(socketDescriptor);
-  connect(socket, &QTcpSocket::readyRead, this, &Messendger::slotReadyRead);
-  connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
+  QObject::connect(socket, &QTcpSocket::readyRead, this,
+                   &Server::slotReadyRead);
+  QObject::connect(socket, &QTcpSocket::disconnected, socket,
+                   &QTcpSocket::deleteLater);
   socets.push_back(socket);
   toLog("client connectid " + socketDescriptor);
 }
+
+// void Server::toLog(QString str) { emit th_server::Logger(str); }
 
 void Messendger::slotReadyRead() {
   socket = (QTcpSocket *)sender();
@@ -55,9 +70,11 @@ void Messendger::SendTo(QString str) {
 }
 
 void Client::connectTo() {
-  socket = new QTcpSocket(this);
+  socket = new QTcpSocket();
   connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
   socket->connectToHost("127.0.0.1", 2323);
   if (socket->waitForConnected())
     toLog("Connected");
+  else
+    toLog("client no connect");
 }

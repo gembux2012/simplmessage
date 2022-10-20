@@ -5,13 +5,27 @@
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QThread>
 #include <QVector>
 
-class Messendger : public QTcpServer {
-
+class Logable : public QObject {
   Q_OBJECT;
 signals:
-  void Logger(QString str);
+  QString Logger(QString str);
+public slots:
+  void toLog(QString str);
+};
+
+class th_server : public Logable {
+  Q_OBJECT;
+signals:
+  void finished(bool);
+public slots:
+  void process();
+};
+
+class Messendger : public QObject {
+  Q_OBJECT;
 
 public:
   QTcpSocket *socket;
@@ -19,11 +33,9 @@ public:
 private:
   QByteArray Data;
   quint16 nextBlockSize;
-  void SendTo(QString str);
-
 public slots:
-  void toLog(QString str);
   void slotReadyRead();
+  void SendTo(QString str);
 };
 
 class Server : public Messendger {
@@ -31,15 +43,18 @@ class Server : public Messendger {
 
 public:
   Server();
+  QTcpServer *tsps;
 public slots:
-  void incomingConnection(qintptr socketDescriptor);
+  void in_conection();
+  void toLog(QString str);
 
 private:
   QVector<QTcpSocket *> socets;
 };
 
 class Client : public Messendger {
-public:
+  Q_OBJECT;
+public slots:
   void connectTo();
 };
 
