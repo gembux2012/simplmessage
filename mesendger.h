@@ -8,7 +8,7 @@
 #include <QThread>
 #include <QVector>
 
-class Logable : public QObject {
+class Logable : private QObject {
   Q_OBJECT;
 signals:
   QString Logger(QString str);
@@ -16,7 +16,7 @@ public slots:
   void toLog(QString str);
 };
 
-class th_server : public Logable {
+class Worker : public QObject {
   Q_OBJECT;
 signals:
   void finished(bool);
@@ -24,8 +24,11 @@ public slots:
   void process();
 };
 
-class Messendger : public QObject {
+class Messendger : private QObject {
   Q_OBJECT;
+
+signals:
+  QString Logger(QString str);
 
 public:
   QTcpSocket *socket;
@@ -36,26 +39,25 @@ private:
 public slots:
   void slotReadyRead();
   void SendTo(QString str);
+  void connectTo();
+  void toLog(QString str);
 };
 
-class Server : public Messendger {
+class Server : public Messendger, public QTcpServer {
   Q_OBJECT;
 
+private:
+  void incomingConnection(qintptr socketDescriptor);
+
 public:
-  Server();
-  QTcpServer *tsps;
+  // Server();
+  // QTcpServer *tsps;
 public slots:
   void in_conection();
   void toLog(QString str);
 
 private:
   QVector<QTcpSocket *> socets;
-};
-
-class Client : public Messendger {
-  Q_OBJECT;
-public slots:
-  void connectTo();
 };
 
 #endif // MESENDGER_H

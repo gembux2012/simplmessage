@@ -1,22 +1,23 @@
 #include "mesendger.h"
 #include <QDataStream>
 
-void Server::Server() { tsps = new QTcpServer(); }
+// void Server::Server() { tsps = new QTcpServer(); }
 
-void th_server::process() {
+void Worker::process() {
   Server *server = new Server();
-  server->tsps->listen(QHostAddress::Any, 2323);
-  if (server != nullptr || server->tsps->isListening()) {
+  server->listen(QHostAddress::Any, 2323);
+  if (server != nullptr || server->isListening()) {
 
-    toLog("Server start");
-  } else {
-    toLog("server error");
+    // toLog("Server start");
     emit finished(false);
+  } else {
+    // toLog("server error");
+    emit finished(true);
   }
 }
 // void Messendger::toLog(QString str) { emit Logger(str); }
 
-void Server::in_conection()::incomingConnection(qintptr socketDescriptor) {
+void Server::incomingConnection(qintptr socketDescriptor) {
   socket = new QTcpSocket;
   socket->setSocketDescriptor(socketDescriptor);
   QObject::connect(socket, &QTcpSocket::readyRead, this,
@@ -69,7 +70,7 @@ void Messendger::SendTo(QString str) {
   socket->write(Data);
 }
 
-void Client::connectTo() {
+void Server::connectTo() {
   socket = new QTcpSocket();
   connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
   socket->connectToHost("127.0.0.1", 2323);

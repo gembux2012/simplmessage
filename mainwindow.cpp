@@ -1,35 +1,35 @@
 #include "mainwindow.h"
 #include "mesendger.h"
 #include "ui_mainwindow.h"
-
+// now
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
 
   ui->setupUi(this);
   ui->textBrowser->resize(300, 500);
-  Client *client = new Client();
-  connect(this, &MainWindow::cnt, client, &Client::connectTo);
-  connect(this, &MainWindow::send, client, &Client::SendTo);
+  Messendger *client = new Messendger();
+  connect(this, &MainWindow::cnt, client, &Messendger::connectTo);
+  connect(this, &MainWindow::send, client, &Messendger::SendTo);
   // connect(client, &Client::Logger, this, &MainWindow::toLog);
 
-  th_server *thserver = new th_server();
+  Worker *worker = new Worker();
   QThread *thread = new QThread();
-  thserver->moveToThread(thread);
+  worker->moveToThread(thread);
   // При запуске потока запускаем выполнение метода Worker::process()
-  connect(thread, &QThread::started, thserver, &th_server::process);
+  connect(thread, &QThread::started, worker, &Worker::process);
   // При излучении сигнала finished получаем флаг успешности и выводим в консоль
   // соответствующее сообщение
-  connect(thserver, &th_server::finished, this, [this](bool state) {
+  connect(worker, &Worker::finished, this, [this](bool state) {
     if (state)
-      toLog("server stop");
+      toLog("server start");
     else
       toLog("server error");
   });
 
   // Также, по сигналу finished отправляем команду на завершение потока
-  connect(thserver, &th_server::finished, thread, &QThread::quit);
+  connect(worker, &Worker::finished, thread, &QThread::quit);
   // А потом удаляем экземпляр обработчика
-  connect(thserver, &th_server::finished, thserver, &QObject::deleteLater);
+  connect(worker, &Worker::finished, worker, &QObject::deleteLater);
   // И наконец, когда закончит работу поток, удаляем и его
   connect(thread, &QThread::finished, thread, &QObject::deleteLater);
   // connect(thserver, &Server::Logger, this, &MainWindow::toLog);
